@@ -2,10 +2,20 @@ const path = require('path');
 const express = require('express');
 const http = require('http');
 const WebSocket = require('ws');
+const fs = require('fs');
 const app = express();
-const httpServer = http.createServer(app);
+                //SSLCertificateFile      /etc/ssl/certs/apache-selfsigned.crt
+                //SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key
+//var key = fs.readFileSync( '/etc/ssl/private/apache-selfsigned.key');
+//var cert = fs.readFileSync( '/etc/ssl/certs/apache-selfsigned.crt');
+//var options = {
+//  key: key,
+//  cert: cert
+//};
+//const httpServer = http.createServer(options, app);
+const httpServer = http.createServer( app);
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3003;
 
 const wsServer = new WebSocket.Server({ server: httpServer }, () => console.log(`WS server is listening at ws://localhost:${WS_PORT}`));
 
@@ -30,8 +40,19 @@ wsServer.on('connection', (ws, req) => {
 });
 
 // HTTP stuff
+let streamerNo = 0;
 app.get('/client', (req, res) => res.sendFile(path.resolve(__dirname, './client.html')));
-app.get('/streamer', (req, res) => res.sendFile(path.resolve(__dirname, './streamer.html')));
+app.get('/streamer', (req, res) => {
+	//streamerNo++;
+	//console.log("New Streamer:" streamerNo);
+	res.sendFile(path.resolve(__dirname, './streamer.html'));
+})
+app.get('/streamerNo', (req, res) => {
+	streamerNo++;
+	console.log("New Streamer:" ,streamerNo);
+	res.send(``+streamerNo);
+});
+
 app.get('/', (req, res) => {
     res.send(`
         <a href="streamer">Streamer</a><br>

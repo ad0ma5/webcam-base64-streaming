@@ -5,6 +5,16 @@
 <body>
     <video autoplay></video>
     <script>
+		var streamerNo = false;
+		var no_url = location.origin+'/streamerNo';
+fetch(no_url).then((data) => {
+	console.log('data',data);
+	return data.text();
+}).then(data => {
+	console.log('data of strreamerNo',data);
+	streamerNo = data;
+});
+    //navigator.getMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia);
         // get video dom element
         const video = document.querySelector('video');
         
@@ -18,17 +28,20 @@
             canvas.height = video.videoHeight;
             canvas.getContext('2d').drawImage(video, 0, 0);
             const data = canvas.toDataURL('image/png');
-            return data;
+
+			return JSON.stringify( { data:data, streamerNo: streamerNo });
         }
         const WS_URL = location.origin.replace(/^http/, 'ws');
-        const FPS = 3;
+        const FPS = 0.55555;
         const ws = new WebSocket(WS_URL);
         ws.onopen = () => {
             console.log(`Connected to ${WS_URL}`);
             setInterval(() => {
-                ws.send(getFrame());
+                if(streamerNo) ws.send(getFrame());
+				else console.log('still no streamer number');
             }, 1000 / FPS);
         }
+		
     </script>
 </body>
 </html>

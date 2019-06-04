@@ -3,7 +3,6 @@
     <title>Client</title>
 </head>
 <body>
-    <img src="">
     <script>
         // get img dom element
         const img = document.querySelector('img');
@@ -13,7 +12,16 @@
         ws.onopen = () => console.log(`Connected to ${WS_URL}`);
         ws.onmessage = message => {
             // set the base64 string to the src tag of the image
-            img.src = message.data;
+			var parsed = JSON.parse(message.data);
+            //img.src = parsed.data;
+			console.log('frame from stream:',parsed.streamerNo);
+			var str =  document.getElementById('stream'+parsed.streamerNo)
+			if(str === null){
+				str = document.createElement('img');
+				str.id = 'stream'+parsed.streamerNo;
+				document.body.append(str);
+			}
+			str.src = parsed.data;
         }
     </script>
 </body>
