@@ -21,7 +21,10 @@
 				str.id = 'stream'+parsed.streamerNo;
 				document.body.append(str);
 			}
-			str.src = parsed.data;
+			if(parsed.data !== "disconnected")
+				str.src = parsed.data;
+			else
+				str.remove();
         }
     </script>
 </body>

@@ -5,6 +5,7 @@
 <body>
     <video autoplay></video>
     <script>
+try{     
 		var streamerNo = false;
 		var no_url = location.origin+'/streamerNo';
 fetch(no_url).then((data) => {
@@ -17,7 +18,6 @@ fetch(no_url).then((data) => {
     //navigator.getMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia);
         // get video dom element
         const video = document.querySelector('video');
-        
         // request access to webcam
         navigator.mediaDevices.getUserMedia({video: {width: 426, height: 240}}).then((stream) => video.srcObject = stream);
         
@@ -41,7 +41,11 @@ fetch(no_url).then((data) => {
 				else console.log('still no streamer number');
             }, 1000 / FPS);
         }
-		
+}catch(err){
+	var er =document.createElement('p',err.stack);
+	document.body.append(er);
+	alert(err.stack);
+}	
     </script>
 </body>
 </html>
