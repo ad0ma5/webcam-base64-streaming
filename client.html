@@ -6,14 +6,20 @@
     <script>
         // get img dom element
         const img = document.querySelector('img');
-        
+        const texarea = document.querySelector('textarea'); 
         const WS_URL = location.origin.replace(/^http/, 'ws');
         const ws = new WebSocket(WS_URL);
         ws.onopen = () => console.log(`Connected to ${WS_URL}`);
         ws.onmessage = message => {
-            // set the base64 string to the src tag of the image
+			var logger = document.getElementById('logger');
+			if(logger === null){
+				logger = document.createElement('textarea');
+				logger.id = 'logger';
+				document.body.append(logger);
+			}
+            		// set the base64 string to the src tag of the image
 			var parsed = JSON.parse(message.data);
-            //img.src = parsed.data;
+       			//img.src = parsed.data;
 			console.log('frame from stream:',parsed.streamerNo);
 			var str =  document.getElementById('stream'+parsed.streamerNo)
 			if(str === null){
@@ -21,10 +27,13 @@
 				str.id = 'stream'+parsed.streamerNo;
 				document.body.append(str);
 			}
-			if(parsed.data !== "disconnected")
+			if(parsed.data !== "disconnected"){
 				str.src = parsed.data;
-			else
+				logger.innerHTML += Date.now()+' data update \n';
+			}else{
 				str.remove();
+				logger.innerHTML += 'data stream closed\n';
+			}
         }
     </script>
 </body>

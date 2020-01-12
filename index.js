@@ -4,10 +4,12 @@ const http = require('https');
 const WebSocket = require('ws');
 const fs = require('fs');
 const app = express();
+
+const PATHTO = process.env.PATHTO || "/var/www/html/www2/webcam-base64-streaming";
                 //SSLCertificateFile      /etc/ssl/certs/apache-selfsigned.crt
                 //SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key
-var key = fs.readFileSync( '/etc/ssl/private/apache-selfsigned.key');
-var cert = fs.readFileSync( '/etc/ssl/certs/apache-selfsigned.crt');
+var key = fs.readFileSync( PATHTO+'/keys/apache-selfsigned.key');
+var cert = fs.readFileSync( PATHTO+'/keys/apache-selfsigned.crt');
 var options = {
   key: key,
   cert: cert
@@ -23,10 +25,10 @@ const wsServer = new WebSocket.Server({ server: httpServer }, () => console.log(
 let connectedClients = [];
 
 wsServer.on('connection', (ws, req) => {
-    console.log('Connected');
 	ws.markedAsSender = false;
     // add new connected client
     connectedClients.push(ws);
+    console.log('Connected new ', connectedClients.length);
     // listen for messages from the streamer, the clients will not send anything so we don't need to filter
     ws.on('message', data => {
 		let streamerNo = JSON.parse(data).streamerNo;
@@ -34,6 +36,8 @@ wsServer.on('connection', (ws, req) => {
 			console.log('marking as sender as msg received');
 			ws.markedAsSender = true;
 			ws.streamerNo = streamerNo;
+		}else{
+			console.log('sender ' +streamerNo + ' sent new img ', );
 		}
 		//console.log("message incomming",connectedClients);
         // send the base64 encoded frame to each connected ws
@@ -46,10 +50,10 @@ wsServer.on('connection', (ws, req) => {
 				}
 				else{
 					//console.log('not same as sender sending img', i);
-                	ws_i.send(data); // send
+                			ws_i.send(data); // send
 				}
             } else { // if it's not connected remove from the array of connected ws
-                if(connectedClients[i].markedAsSender){
+                		if(connectedClients[i].markedAsSender){
 					console.log('need to send receivers closed streamer notice');
 					connectedClients.forEach((ws_c, ii) => {   
 						if(ws_c.markedAsSender){
@@ -84,10 +88,32 @@ app.get('/streamerNo', (req, res) => {
 	res.send(``+streamerNo);
 });
 
+app.get('/bled', (req, res) => {
+	var directoryPath = path.join(PATHTO, '../bled');
+	fs.readdir(directoryPath, function (err, files) {
+		if (err) {
+			console.log('Unable to scan directory: ' + err);
+			res.send(``+'nope scan');
+
+		} 
+		if(files.length ==  0){
+			res.send(``+'nope length');
+		}else{
+			var rr = parseInt( Math.random(files.length) * files.length);
+			console.log(files, rr, files[rr]);
+			fs.readFile( path.join(directoryPath,files[rr]), function(err, data) {
+				    res.writeHead(200, {'Content-Type': 'image/jpeg'});
+				    res.write(data);
+				    res.end();
+				  });
+		}
+	});
+});
 app.get('/', (req, res) => {
     res.send(`
         <a href="streamer">Streamer</a><br>
-        <a href="client">Client</a>
+        <a href="client">Client</a><br>
+        <a href="bled">Bled</a>
     `);
 });
 httpServer.listen(PORT, () => console.log(`HTTP server listening at http://localhost:${PORT}`));

@@ -1,0 +1,4 @@
+  482  sudo vim /etc/systemd/system/webcam-base64-streaming.service
+  490  sudo service webcam-base64-streaming stop
+  493  sudo systemctl daemon-reload 
+
